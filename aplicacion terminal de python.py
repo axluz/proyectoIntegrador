@@ -1,36 +1,56 @@
 import pickle
 
+class Libro:
+    def __init__(self, titulo, autor, cantidad=1, disponible=True):
+        self.titulo = titulo
+        self.autor = autor
+        self.cantidad = cantidad
+        self.disponible = disponible
+
+class Usuario:
+    def __init__(self, nombre):
+        self.nombre = nombre
+        self.libros_prestados = []
+
 class Biblioteca:
     def __init__(self):
         self.libros = {}
-        self.usuarios = {}
+        self.usuarios = []
 
     def agregar_libro(self, titulo, autor):
         if titulo in self.libros:
-            self.libros[titulo]['cantidad'] += 1
+            self.libros[titulo].cantidad += 1
         else:
-            self.libros[titulo] = {'autor': autor, 'cantidad': 1, 'disponible': True}
+            self.libros[titulo] = Libro(titulo, autor)
 
     def mostrar_libros(self):
-        for titulo, info in self.libros.items():
-            disponibilidad = "Disponible" if info['disponible'] else "No disponible"
-            print(f"{titulo} - {info['autor']} - Cantidad: {info['cantidad']} - {disponibilidad}")
+        print("Lista de libros:")
+        for libro in self.libros.values():
+            disponibilidad = "Disponible" if libro.disponible else "No disponible"
+            print(f"{libro.titulo} - {libro.autor} - Cantidad: {libro.cantidad} - {disponibilidad}")
 
-    def prestar_libro(self, titulo, usuario):
-        if titulo in self.libros and self.libros[titulo]['disponible']:
-            if usuario in self.usuarios:
-                self.usuarios[usuario].append(titulo)
-                self.libros[titulo]['cantidad'] -= 1
-                self.libros[titulo]['disponible'] = False
-                print(f"El libro '{titulo}' ha sido prestado a {usuario}.")
-            else:
-                print(f"El usuario '{usuario}' no está registrado.")
-        else:
-            print(f"El libro '{titulo}' no está disponible.")
+    def prestar_libro(self, titulo, nombre_usuario):
+        for usuario in self.usuarios:
+            if usuario.nombre == nombre_usuario:
+                if titulo in self.libros and self.libros[titulo].disponible and self.libros[titulo].cantidad > 0:
+                    usuario.libros_prestados.append(titulo)
+                    self.libros[titulo].cantidad -= 1
+                    self.libros[titulo].disponible = False
+                    print(f"El libro '{titulo}' ha sido prestado a {nombre_usuario}")
+                    return
+                else:
+                    print("El libro no está disponible para préstamo")
+                    return
+        print("Usuario no encontrado")
 
-    def registrar_usuario(self, usuario):
-        if usuario not in self.usuarios:
-            self.usuarios[usuario] = []
+    def registrar_usuario(self, nombre):
+        self.usuarios.append(Usuario(nombre))
+        print(f"Usuario {nombre} registrado con éxito")
+
+    def listar_usuarios(self):
+        print("Lista de usuarios:")
+        for usuario in self.usuarios:
+            print(usuario.nombre)
 
     def guardar_datos(self):
         with open('datos_biblioteca.pkl', 'wb') as archivo:
@@ -44,48 +64,39 @@ class Biblioteca:
             self.libros = {}
             self.usuarios = {}
 
-    def listar_usuarios(self):
-        print("Usuarios registrados:")
-        for usuario in self.usuarios:
-            print(usuario)
-
-    def listar_libros_usuario(self, usuario):
-        if usuario in self.usuarios:
-            print(f"Libros prestados a {usuario}:")
-            for libro in self.usuarios[usuario]:
-                print(libro)
-        else:
-            print(f"El usuario '{usuario}' no está registrado o no tiene libros prestados.")
-
-    def devolver_libro(self, titulo, usuario):
-        if usuario in self.usuarios and titulo in self.usuarios[usuario]:
-            self.usuarios[usuario].remove(titulo)
-            self.libros[titulo]['cantidad'] += 1
-            self.libros[titulo]['disponible'] = True
-            print(f"El libro '{titulo}' ha sido devuelto por {usuario}.")
-        else:
-            print(f"El usuario '{usuario}' no tiene prestado el libro '{titulo}'.")
-
-
+# Ejemplos de uso
 biblioteca = Biblioteca()
-biblioteca.cargar_datos()
 
-# Agregar libros
+biblioteca.agregar_libro("Cien años de soledad", "Gabriel García Márquez")
+biblioteca.agregar_libro("Don Quijote de la Mancha", "Miguel de Cervantes")
+biblioteca.agregar_libro("El Principito", "Antoine de Saint-Exupéry")
+print('\n')
+
 while True:
-    agregarLibro = input('desea agregar un libro [s]i o [n]o ')
+    agregarLibro = input('Desea agregar un libro? (s)i o (n)o?: ')
     if agregarLibro == 's':
-        biblioteca.agregar_libro(input('agregar autor: '),input('agregar titulo: '))
+        biblioteca.agregar_libro(input("Titulo: "), input("Autor: "))
     else:
         break
+print('\n')
 
-# Mostrar libros
 biblioteca.mostrar_libros()
+print('\n')
 
-# Registrar usuario
-biblioteca.registrar_usuario(user = input(''))
 
-# Prestar libro
-biblioteca.prestar_libro(prestarLibro = input(' '), aUsuario = input(''))
+biblioteca.registrar_usuario(input('Nuevo Usuario: '))
+print('\n')
 
-# Guardar datos
+
+#biblioteca.prestar_libro("El Principito", "Juan")
+while True:
+    prestarLibro = input('Desea prestar un libro [s]i o [n]o: ')
+    if prestarLibro == 's':
+        biblioteca.prestar_libro(input("titulo a prestar: "),input("a que usuario: "))
+    else:
+        break
+print('\n')
+
+biblioteca.listar_usuarios()
+biblioteca.mostrar_libros()
 biblioteca.guardar_datos()
