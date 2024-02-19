@@ -52,20 +52,24 @@ class Biblioteca:
         for usuario in self.usuarios:
             print(usuario.nombre)
 
-    def guardar_datos(self):
-        with open('datos_biblioteca.pkl', 'wb') as archivo:
-            pickle.dump((self.libros, self.usuarios), archivo)
+    def guardar_datos(self, nombre_archivo):
+        with open(nombre_archivo, 'wb') as archivo:
+            datos = {'libros': self.libros, 'usuarios': self.usuarios}
+            pickle.dump(datos, archivo)
+        print("Datos guardados correctamente")
 
-    def cargar_datos(self):
-        try:
-            with open('datos_biblioteca.pkl', 'rb') as archivo:
-                self.libros, self.usuarios = pickle.load(archivo)
-        except FileNotFoundError:
-            self.libros = {}
-            self.usuarios = {}
+    def cargar_datos(self, nombre_archivo):
+        with open(nombre_archivo, 'rb') as archivo:
+            datos = pickle.load(archivo)
+            self.libros = datos['libros']
+            self.usuarios = datos['usuarios']
+        print("Datos cargados correctamente")
+    
 
 # Ejemplos de uso
 biblioteca = Biblioteca()
+
+biblioteca.cargar_datos('baseDatos.pickle')
 
 biblioteca.agregar_libro("Cien años de soledad", "Gabriel García Márquez")
 biblioteca.agregar_libro("Don Quijote de la Mancha", "Miguel de Cervantes")
@@ -99,4 +103,4 @@ print('\n')
 
 biblioteca.listar_usuarios()
 biblioteca.mostrar_libros()
-biblioteca.guardar_datos()
+biblioteca.guardar_datos('baseDatos.pickle')
